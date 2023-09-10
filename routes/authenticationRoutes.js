@@ -4,7 +4,35 @@ const Account = mongoose.model('Account');
 module.exports = app => {
 
     // Routes
-    app.post('/account', async (req, res) => {
+
+    // Login 
+    app.post('/account/login', async (req, res) => {
+
+        const { rUsername, rPassword } = req.body;
+        if (rUsername == null || rPassword == null) {
+            res.send("Invalid credentials");
+            return;
+        }
+
+        var userAccount = await Account.findOne({ username: rUsername });
+        if (userAccount != null) {
+            if (rPassword == userAccount.password) {
+                userAccount.lastAuthentication = Date.now();
+                await userAccount.save();
+
+                console.log("Retrieving account");
+                res.send(userAccount);
+                return;
+            }
+        }
+
+        res.send("Invalid credentials");
+        return;
+
+    });
+
+    // Create an account
+    app.post('/account/create', async (req, res) => {
 
         const { rUsername, rPassword } = req.body;
         if (rUsername == null || rPassword == null) {
@@ -29,17 +57,8 @@ module.exports = app => {
             return;
         }
         else {
-            if (rPassword == userAccount.password) {
-                userAccount.lastAuthentication = Date.now();
-                await userAccount.save();
-
-                console.log("Retrieving account");
-                res.send(userAccount);
-                return;
-            }
+            res.send("Account already exists");
         }
-
-        res.send("Invalid credentials");
         return;
 
     });
