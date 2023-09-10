@@ -4,9 +4,9 @@ const Account = mongoose.model('Account');
 module.exports = app => {
 
     // Routes
-    app.get('/account', async (req, res) => {
+    app.post('/account', async (req, res) => {
 
-        const { rUsername, rPassword } = req.query;
+        const { rUsername, rPassword } = req.body;
         if (rUsername == null || rPassword == null) {
             res.send("Invalid credentials");
             return;
