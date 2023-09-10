@@ -98,7 +98,7 @@ module.exports = app => {
                     await newAccount.save();
 
                     response.code = 0;
-                    response.msg = 'Account found';
+                    response.msg = 'Account created';
                     response.data = (({ username }) => ({ username }))(newAccount);
                     res.send(response);
 

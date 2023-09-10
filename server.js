@@ -6,6 +6,13 @@ const bodyParser = require('body-parser');
 // Parse application/x-www-form-urlencoded
 app.use(bodyParser.urlencoded({ extended: false }));
 
+// Access-Control-Allow
+  app.use(function(req, res, next) {
+    res.header("Access-Control-Allow-Origin", "http://localhost:5173");
+    res.header("Access-Control-Allow-Headers", "Content-Type");
+    next();
+  });
+
 // Setting up DB
 const mongoose = require('mongoose');
 mongoose.connect(keys.mongoURI,);
