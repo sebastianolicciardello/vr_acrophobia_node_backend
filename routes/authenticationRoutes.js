@@ -1,6 +1,10 @@
 const mongoose = require('mongoose');
 const Account = mongoose.model('Account');
 
+const argon2i = require('argon2-ffi').argon2i;
+const crypto = require('crypto');
+
+
 module.exports = app => {
 
     // Routes
@@ -16,18 +20,19 @@ module.exports = app => {
 
         var userAccount = await Account.findOne({ username: rUsername });
         if (userAccount != null) {
-            if (rPassword == userAccount.password) {
-                userAccount.lastAuthentication = Date.now();
-                await userAccount.save();
-
-                console.log("Retrieving account");
-                res.send(userAccount);
-                return;
-            }
+            argon2i.verify(userAccount.password, rPassword).then(async (success) => {
+                if(success) {
+                    userAccount.lastAuthentication = Date.now();
+                    await userAccount.save();
+                    res.send(userAccount);
+                    return;
+                }
+                else{
+                    res.send("Invalid credentials");
+                    return;
+                }
+            });
         }
-
-        res.send("Invalid credentials");
-        return;
 
     });
 
@@ -45,16 +50,27 @@ module.exports = app => {
             //Create a new account
             console.log("Creating new account");
 
-            var newAccount = new Account({
-                username: rUsername,
-                password: rPassword,
+            // Generate a unique access token
+            crypto.randomBytes(32, function (err, salt) {
+                argon2i.hash(rPassword, salt).then(async (hash) => {
+                    var newAccount = new Account({
+                        username: rUsername,
+                        password: hash,
+                        salt: salt,
 
-                lastAuthentication: Date.now(),
-            })
-            await newAccount.save();
+                        lastAuthentication: Date.now(),
+                    })
 
-            res.send(newAccount);
-            return;
+                    await newAccount.save();
+
+                    res.send(newAccount);
+                    return;
+                })
+            });
+
+
+
+
         }
         else {
             res.send("Account already exists");
