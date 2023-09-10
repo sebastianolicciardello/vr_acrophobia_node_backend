@@ -4,6 +4,9 @@ const Account = mongoose.model('Account');
 const argon2i = require('argon2-ffi').argon2i;
 const crypto = require('crypto');
 
+const jwt = require('jsonwebtoken');
+
+const secretKey = crypto.randomBytes(64).toString('hex');
 const passwordRegex = new RegExp('(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.{8,24})');
 
 module.exports = app => {
@@ -31,9 +34,19 @@ module.exports = app => {
                     userAccount.lastAuthentication = Date.now();
                     await userAccount.save();
 
+                    // Generate a unique token
+                    const token = jwt.sign(
+                        {
+                            username: userAccount.username,
+                            adminFlag: userAccount.adminFlag,
+                        },
+                        secretKey
+                    );
+
                     response.code = 0;
-                    response.msg = 'Account found';
+                    response.msg = 'Login successful';
                     response.data = (({ username, adminFlag }) => ({ username, adminFlag }))(userAccount);
+                    response.token = token;
                     res.send(response);
 
                     return;
@@ -82,7 +95,7 @@ module.exports = app => {
 
             // Generate a unique access token
             crypto.randomBytes(32, function (err, salt) {
-                if(err){
+                if (err) {
                     console.log(err);
                 }
 
