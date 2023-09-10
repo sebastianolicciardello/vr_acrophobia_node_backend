@@ -12,26 +12,43 @@ module.exports = app => {
     // Login 
     app.post('/account/login', async (req, res) => {
 
+        var response = {};
+
         const { rUsername, rPassword } = req.body;
         if (rUsername == null || rPassword == null) {
-            res.send("Invalid credentials");
+
+            response.code = 1;
+            response.msg = 'Invalid credentials';
+            res.send(response);
             return;
         }
 
         var userAccount = await Account.findOne({ username: rUsername });
         if (userAccount != null) {
             argon2i.verify(userAccount.password, rPassword).then(async (success) => {
-                if(success) {
+                if (success) {
                     userAccount.lastAuthentication = Date.now();
                     await userAccount.save();
-                    res.send(userAccount);
+
+                    response.code = 0;
+                    response.msg = 'Account found';
+                    response.data = userAccount;
+                    res.send(response);
+
                     return;
                 }
-                else{
-                    res.send("Invalid credentials");
+                else {
+                    response.code = 1;
+                    response.msg = 'Invalid credentials';
+                    res.send(response);
                     return;
                 }
             });
+        } else {
+            response.code = 1;
+            response.msg = 'Invalid credentials';
+            res.send(response);
+            return;
         }
 
     });
@@ -39,9 +56,14 @@ module.exports = app => {
     // Create an account
     app.post('/account/create', async (req, res) => {
 
+
+        var response = {};
+
         const { rUsername, rPassword } = req.body;
         if (rUsername == null || rPassword == null) {
-            res.send("Invalid credentials");
+            response.code = 1;
+            response.msg = 'Invalid credentials';
+            res.send(response);
             return;
         }
 
@@ -63,17 +85,19 @@ module.exports = app => {
 
                     await newAccount.save();
 
-                    res.send(newAccount);
+                    response.code = 0;
+                    response.msg = 'Account found';
+                    response.data = userAccount;
+                    res.send(response);
+
                     return;
                 })
             });
-
-
-
-
         }
         else {
-            res.send("Account already exists");
+            response.code = 2;
+            response.msg = 'Account already exists';
+            res.send(response);
         }
         return;
 
