@@ -7,11 +7,11 @@ const bodyParser = require('body-parser');
 app.use(bodyParser.urlencoded({ extended: false }));
 
 // Access-Control-Allow
-  app.use(function(req, res, next) {
-    res.header("Access-Control-Allow-Origin", "http://localhost:5173");
-    res.header("Access-Control-Allow-Headers", "Content-Type");
-    next();
-  });
+app.use(function(req, res, next) {
+  res.header("Access-Control-Allow-Origin", "http://localhost:5173");
+  res.header("Access-Control-Allow-Headers", "Content-Type, Authorization");
+  next();
+});
 
 // Setting up DB
 const mongoose = require('mongoose');

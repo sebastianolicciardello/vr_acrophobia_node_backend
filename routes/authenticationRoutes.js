@@ -6,12 +6,28 @@ const crypto = require('crypto');
 
 const jwt = require('jsonwebtoken');
 
-const secretKey = crypto.randomBytes(64).toString('hex');
+const { secretKey } = require('../config/secrets');
 const passwordRegex = new RegExp('(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.{8,24})');
 
 module.exports = app => {
 
     // Routes
+
+    // Verify token
+    app.get('/verify-token', (req, res) => {
+        const token = req.headers.authorization?.split(' ')[1];
+
+        try {
+            // Verify the token and extract the username
+            const decodedToken = jwt.verify(token, secretKey);
+            const username = decodedToken.username;
+
+            res.json({ username });
+        } catch (error) {
+            console.error(error);
+            res.status(401).json({ error: 'Invalid token' });
+        }
+    });
 
     // Login 
     app.post('/account/login', async (req, res) => {
