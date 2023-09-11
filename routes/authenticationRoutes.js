@@ -18,11 +18,11 @@ module.exports = app => {
         const token = req.headers.authorization?.split(' ')[1];
 
         try {
-            // Verify the token and extract the username
+            // Verify the token and extract the id
             const decodedToken = jwt.verify(token, secretKey);
-            const username = decodedToken.username;
+            const id = decodedToken.id;
 
-            res.json({ username });
+            res.json({ id });
         } catch (error) {
             console.error(error);
             res.status(401).json({ error: 'Invalid token' });
@@ -53,7 +53,7 @@ module.exports = app => {
                     // Generate a unique token
                     const token = jwt.sign(
                         {
-                            username: userAccount.username,
+                            id: userAccount._id._id.toHexString(),
                             adminFlag: userAccount.adminFlag,
                         },
                         secretKey
