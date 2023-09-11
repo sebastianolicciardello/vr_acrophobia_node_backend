@@ -88,4 +88,25 @@ module.exports = app => {
             res.status(500).json({ error: 'Internal Server Error' });
         }
     })
+
+    // Route for deleting a player
+    app.post('/deletePlayer', async (req, res) => {
+        try {
+            // Retrieve player based on the ID
+            const player = await Player.findOne({ _id: req.body.id });
+
+            if (!player) {
+                res.status(404).json({ error: 'Player not found' });
+                return;
+            }
+
+            // Delete the player
+            await Player.deleteOne({ _id: req.body.id });
+
+            res.json({ message: 'Player deleted successfully' });
+        } catch (error) {
+            console.error('Error deleting player:', error);
+            res.status(500).json({ error: 'Internal Server Error' });
+        }
+    });
 };
